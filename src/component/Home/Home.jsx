@@ -6,6 +6,8 @@ export default function Home() {
   let [tasks, setTasks] = useState([]);
   let [isLoading, setIsLoading] = useState(false);
   let [categories, setCategories] = useState([]);
+  const [page, setPage] = useState(1);
+  const limit = 20;
 
   function getAllCategories() {
     axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/categories?order=name.asc`, {
@@ -25,7 +27,7 @@ export default function Home() {
 
   function getAllTasks() {
     setIsLoading(true);
-    axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/tasks?order=created_at.desc`, {
+    axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/tasks?order=created_at.desc&limit=${limit}&offset=${(page - 1) * limit}`, {
       headers: {
         apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE",
         Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE`,
@@ -45,7 +47,7 @@ export default function Home() {
   useEffect(() => {
     getAllTasks();
     getAllCategories();
-  }, []);
+  }, [page]);
 
   return <>
     <section className="w-[95%] mx-auto py-6">
@@ -122,6 +124,22 @@ export default function Home() {
           </Table>
         </div>
       }
+
+       {/* Pagination Controls */}
+          <div className="flex justify-center gap-4 mt-4">
+            <button className='text-main'
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2 border rounded text-second">Page {page}</span>
+            <button  className='text-main'
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </button>
+          </div>
 
     </section >
   </>

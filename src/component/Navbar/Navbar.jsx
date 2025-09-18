@@ -47,9 +47,10 @@ export default function Navbar() {
 
       {/* Right Side */}
       <div className="hidden md:flex justify-center items-center gap-6">
-        <ul className="flex flex-col gap-4">
+        <ul className="flex items-center gap-4">
+          <li><Link to='/' className='rounded-md font-[600] text-[17px] hover:text-gray-600 text-white bg-main p-2'>All Tasks</Link></li>
           <li>
-            <Dropdown label="Categories" dismissOnClick={false} className='foonr-[600] text-[17px] hover:text-gray-600 text-white bg-second p-3'>
+            <Dropdown label="Categories" dismissOnClick={false} className='font-[600] text-[17px] hover:text-gray-600 text-white bg-second p-3'>
               {categories?.map((category) => (
                     <DropdownItem key={category.id}>
                       <Link to={`/category/${category.id}`} className="w-full block text-start">
