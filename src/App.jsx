@@ -15,7 +15,7 @@ function App() {
   let router = createBrowserRouter([
     {path:'', element: <Layout/>, children:[
       {index:true, element:<Home/>},
-      {path:'category', element:<SpecificCategory/>},
+      {path:'category/:id', element:<SpecificCategory/>},
       {path:'*', element:<NotFound/>},
     ]},
   ]);

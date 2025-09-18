@@ -1,41 +1,64 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Checkbox, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 export default function SpecificCategory() {
-    const [filter, setFilter] = useState("All");
-  
-    const tasks = [
-      {
-        id: 1,
-        title: "Finish React Project",
-        category: { name: "Work", color: "bg-blue-500" },
-        priority: "high",
-        image: "https://via.placeholder.com/40",
-        completed: false,
+
+  let [tasks, setTasks] = useState([]);
+  let [isLoading, setIsLoading] = useState(false);
+  let { id } = useParams();
+  let [categories, setCategories] = useState([]);
+
+  function getAllCategories() {
+    axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/categories?order=name.asc`, {
+      headers: {
+        apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE",
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE`,
       },
-      {
-        id: 2,
-        title: "Buy Groceries",
-        category: { name: "Personal", color: "bg-green-500" },
-        priority: "medium",
-        image: "https://via.placeholder.com/40",
-        completed: true,
+    })
+      .then((request) => {
+        setCategories(request.data);
+        console.log(categories);
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+  }
+
+  function getAllTasks() {
+    setIsLoading(true);
+    axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/tasks?order=created_at.desc`, {
+      headers: {
+        apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE",
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE`,
       },
-    ];
-  
-    const priorities = {
-      high: "bg-red-500",
-      medium: "bg-orange-400",
-      low: "bg-green-400",
-    };
-  
-    const filteredTasks =
-      filter === "All" ? tasks : tasks.filter((t) => t.category.name === filter);
-  
-    return <>
-      <section className="w-[95%] mx-auto py-6 h-lvh">
-  
-        {/* Table */}
+    })
+      .then((request) => {
+        setTasks(request.data);
+        console.log(tasks);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error)
+        setIsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    getAllTasks();
+    getAllCategories();
+  }, []);
+
+  return <>
+    <section className="w-[95%] mx-auto py-6">
+      {isLoading ?
+        <div className="flex justify-center items-center h-screen">
+          <span className="text-2xl font-bold animate-pulse text-second">Loading...</span>
+        </div>
+
+        :
+
         <div className="overflow-x-auto rounded-lg shadow-md">
           <Table hoverable>
             <TableHead className="bg-gray dark:bg-gray-700">
@@ -47,59 +70,62 @@ export default function SpecificCategory() {
                 <TableHeadCell className="text-left text-main">Priority</TableHeadCell>
               </TableRow>
             </TableHead>
-  
+
             <TableBody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredTasks.map((task) => (
-                <TableRow
-                  key={task.id}
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  {/* Completed */}
-                  <TableCell className="p-4">
-                    <Checkbox
-                      checked={task.completed}
-                      onChange={() => console.log("PATCH request here")}
-                    />
-                  </TableCell>
-  
-                  {/* Image */}
-                  <TableCell className="py-3">
-                    <img
-                      src={task.image}
-                      alt={task.title}
-                      className="w-10 h-10 rounded-md object-cover border border-gray-300"
-                    />
-                  </TableCell>
-  
-                  {/* Title */}
-                  <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                    {task.title}
-                  </TableCell>
-  
-                  {/* Category with Color */}
-                  <TableCell>
-                    <span
-                      className={`px-3 py-1 text-white text-sm rounded-full ${task.category.color}`}
-                    >
-                      {task.category.name}
-                    </span>
-                  </TableCell>
-  
-                  {/* Priority Indicator */}
-                  <TableCell>
-                    <div className="flex items-center gap-2">
+              {tasks.filter((task) => String(task.category_id) === String(id))
+                .map((task) => (
+                  <TableRow
+                    key={task.id}
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    {/* Completed */}
+                    <TableCell className="p-4">
+                      <Checkbox
+                        checked={task.completed}
+                        onChange={() => console.log("PATCH request here")}
+                      />
+                    </TableCell>
+
+                    {/* Image */}
+                    <TableCell className="py-3">
+                      <img
+                        src={task.image_url}
+                        alt={task.title}
+                        className="w-10 h-10 rounded-md object-cover border border-gray-300"
+                      />
+                    </TableCell>
+
+                    {/* Title */}
+                    <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                      {task.title}
+                    </TableCell>
+
+                    {/* Category with Color */}
+                    <TableCell>
                       <span
-                        className={`inline-block w-3 h-3 rounded-full ${priorities[task.priority]}`}
-                      ></span>
-                      <span className="capitalize text-sm">{task.priority}</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        className={`px-3 py-1 text-white text-sm rounded-full`}
+                        style={{ backgroundColor: categories.find(c => c.id === task.category_id)?.color }}
+                      >
+                        {categories.find(c => c.id === task.category_id)?.name}
+                      </span>
+                    </TableCell>
+
+                    {/* Priority Indicator */}
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-block w-3 h-3 rounded-full`}
+                        ></span>
+                        <span className="capitalize text-sm">{task.priority}</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
-  
-      </section>
-    </>
+      }
+
+    </section >
+  </>
 }
