@@ -5,12 +5,37 @@ import { useParams } from 'react-router-dom';
 
 export default function SpecificCategory() {
 
-  let [tasks, setTasks] = useState([]);
   let [isLoading, setIsLoading] = useState(false);
-  let { id } = useParams();
+  let [tasks, setTasks] = useState([]);
   let [categories, setCategories] = useState([]);
+  let { id } = useParams();
   const [page, setPage] = useState(1);
   const limit = 20;
+
+  function updateTaskStatus(taskId, newStatus) {
+    axios.patch(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/tasks?id=eq.${taskId}`,
+      {
+        completed: newStatus
+      },
+      {
+        headers: {
+          apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE",
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE`,
+          Prefer: "return=representation",
+        },
+      })
+      .then((request) => {
+        console.log("Updated:", request.data);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === taskId ? { ...task, completed: newStatus } : task
+          )
+        );
+      })
+      .catch((error) => {
+        Alert(error)
+      });
+  }
 
   function getAllCategories() {
     axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/categories?order=name.asc`, {
@@ -24,7 +49,7 @@ export default function SpecificCategory() {
         console.log(categories);
       })
       .catch((error) => {
-        console.log(error)
+        Alert(error)
       });
   }
 
@@ -42,8 +67,8 @@ export default function SpecificCategory() {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error)
         setIsLoading(false);
+        Alert(error)
       });
   }
 
@@ -53,7 +78,7 @@ export default function SpecificCategory() {
   }, [page]);
 
   return <>
-    <section className="w-[95%] mx-auto py-6">
+    <section className="w-[90%] mx-auto py-6 min-h-full">
       {isLoading ?
         <div className="flex justify-center items-center h-screen">
           <span className="text-2xl font-bold animate-pulse text-second">Loading...</span>
@@ -84,7 +109,7 @@ export default function SpecificCategory() {
                     <TableCell className="p-4">
                       <Checkbox
                         checked={task.completed}
-                        onChange={() => console.log("PATCH request here")}
+                        onChange={() => updateTaskStatus(task.id, !task.completed)}
                       />
                     </TableCell>
 
@@ -93,6 +118,7 @@ export default function SpecificCategory() {
                       <img
                         src={task.image_url}
                         alt={task.title}
+                        loading="lazy"
                         className="w-10 h-10 rounded-md object-cover border border-gray-300"
                       />
                     </TableCell>
@@ -144,6 +170,6 @@ export default function SpecificCategory() {
             </button>
           </div>
 
-    </section >
+    </section>
   </>
 }

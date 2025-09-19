@@ -1,13 +1,38 @@
 import React, { useEffect, useState } from 'react'
-import { Checkbox, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
+import { Alert, Checkbox, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
 import axios from 'axios';
 
 export default function Home() {
-  let [tasks, setTasks] = useState([]);
   let [isLoading, setIsLoading] = useState(false);
+  let [tasks, setTasks] = useState([]);
   let [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
   const limit = 20;
+
+  function updateTaskStatus(taskId, newStatus) {
+    axios.patch(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/tasks?id=eq.${taskId}`,
+      {
+        completed: newStatus
+      },
+      {
+        headers: {
+          apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE",
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtieWJkdGFjb3F2Z2NpanJremt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzUwNjAsImV4cCI6MjA3MTYxMTA2MH0.SAF_9jupuaVLHq0l7Zbew7t6avUdg_UkdVGqLZmHTQE`,
+          Prefer: "return=representation",
+        },
+      })
+      .then((request) => {
+        console.log("Updated:", request.data);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === taskId ? { ...task, completed: newStatus } : task
+          )
+        );
+      })
+      .catch((error) => {
+        Alert(error)
+      });
+  }
 
   function getAllCategories() {
     axios.get(`https://kbybdtacoqvgcijrkzkv.supabase.co/rest/v1/categories?order=name.asc`, {
@@ -21,7 +46,7 @@ export default function Home() {
         console.log(categories);
       })
       .catch((error) => {
-        console.log(error)
+        Alert(error)
       });
   }
 
@@ -39,8 +64,8 @@ export default function Home() {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error)
         setIsLoading(false);
+        Alert(error)
       });
   }
 
@@ -50,7 +75,7 @@ export default function Home() {
   }, [page]);
 
   return <>
-    <section className="w-[95%] mx-auto py-6">
+    <section className="w-[90%] mx-auto py-6 min-h-full">
       {isLoading ?
         <div className="flex justify-center items-center h-screen">
           <span className="text-2xl font-bold animate-pulse text-second">Loading...</span>
@@ -80,7 +105,7 @@ export default function Home() {
                   <TableCell className="p-4">
                     <Checkbox
                       checked={task.completed}
-                      onChange={() => console.log("PATCH request here")}
+                      onChange={() => updateTaskStatus(task.id, !task.completed)}
                     />
                   </TableCell>
 
@@ -89,6 +114,7 @@ export default function Home() {
                     <img
                       src={task.image_url}
                       alt={task.title}
+                      loading="lazy"
                       className="w-10 h-10 rounded-md object-cover border border-gray-300"
                     />
                   </TableCell>
@@ -104,7 +130,7 @@ export default function Home() {
                       className={`px-3 py-1 text-white text-sm rounded-full`}
                       style={{ backgroundColor: categories.find(c => c.id === task.category_id)?.color }}
                     >
-                     {categories.find(c => c.id === task.category_id)?.name}
+                      {categories.find(c => c.id === task.category_id)?.name}
                     </span>
                   </TableCell>
 
@@ -125,26 +151,23 @@ export default function Home() {
         </div>
       }
 
-       {/* Pagination Controls */}
-          <div className="flex justify-center gap-4 mt-4">
-            <button className='text-main'
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 border rounded text-second">Page {page}</span>
-            <button  className='text-main'
-              onClick={() => setPage(page + 1)}
-            >
-              Next
-            </button>
-          </div>
+      {/* Pagination Controls */}
+      <div className="flex justify-center gap-4 mt-4">
+        <button className='text-main'
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+        >
+          Previous
+        </button>
+        <span className="px-4 py-2 border rounded text-second">Page {page}</span>
+        <button className='text-main'
+          onClick={() => setPage(page + 1)}
+        >
+          Next
+        </button>
+      </div>
 
-    </section >
+    </section>
   </>
 }
-
-
-// className={`px-3 py-1 text-white text-sm rounded-full ${task.category.color}`}
 
