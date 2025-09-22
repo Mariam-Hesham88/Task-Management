@@ -4,6 +4,8 @@
 This project is a **Task Viewer Web Application** built as part of the Frontend Developer Intern Technical Test. It allows users to view tasks fetched from a Supabase REST API,
 filter them by category, and mark tasks as complete or incomplete.
 
+Live-Demo: https://task-management-delta-azure.vercel.app/
+
 ## Features
 * Display tasks in a **table/list** with:
   * Title
